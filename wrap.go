@@ -112,14 +112,14 @@ func GetDeviceUUID(deviceID int32) string {
 	if uuid == C.CFUUIDRef(0) {
 		return ""
 	}
-	return cfStringToGoString(C.CFUUIDCreateString(nil, uuid))
+	return cfStringToGoString(C.CFUUIDCreateString(C.kCFAllocatorDefault, uuid))
 }
 
 func cfStringToGoString(cfs C.CFStringRef) string {
 	if cfs == 0 {
 		return ""
 	}
-	cfStr := C.CFStringCreateCopy(nil, cfs)
+	cfStr := C.CFStringCreateCopy(C.kCFAllocatorDefault, cfs)
 	length := C.CFStringGetLength(cfStr)
 	if length == 0 {
 		// short-cut for empty strings
@@ -172,7 +172,7 @@ func createPaths(paths []string) (C.CFArrayRef, error) {
 		cpath := C.CString(p)
 		defer C.free(unsafe.Pointer(cpath))
 
-		str := C.CFStringCreateWithCString(nil, cpath, C.kCFStringEncodingUTF8)
+		str := C.CFStringCreateWithCString(C.kCFAllocatorDefault, cpath, C.kCFStringEncodingUTF8)
 		C.CFArrayAppendValue(C.CFMutableArrayRef(cPaths), unsafe.Pointer(str))
 	}
 	var err error
