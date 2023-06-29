@@ -11,16 +11,16 @@ static CFArrayRef ArrayCreateMutable(int len) {
 	return CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
 }
 
-extern void fsevtCallback(FSEventStreamRef p0, uintptr_t info, size_t p1, char** p2, FSEventStreamEventFlags* p3, FSEventStreamEventId* p4);
+extern void fsevtCallbackMutagen(FSEventStreamRef p0, uintptr_t info, size_t p1, char** p2, FSEventStreamEventFlags* p3, FSEventStreamEventId* p4);
 
 static FSEventStreamRef EventStreamCreateRelativeToDevice(FSEventStreamContext * context, uintptr_t info, dev_t dev, CFArrayRef paths, FSEventStreamEventId since, CFTimeInterval latency, FSEventStreamCreateFlags flags) {
 	context->info = (void*) info;
-	return FSEventStreamCreateRelativeToDevice(NULL, (FSEventStreamCallback) fsevtCallback, context, dev, paths, since, latency, flags);
+	return FSEventStreamCreateRelativeToDevice(NULL, (FSEventStreamCallback) fsevtCallbackMutagen, context, dev, paths, since, latency, flags);
 }
 
 static FSEventStreamRef EventStreamCreate(FSEventStreamContext * context, uintptr_t info, CFArrayRef paths, FSEventStreamEventId since, CFTimeInterval latency, FSEventStreamCreateFlags flags) {
 	context->info = (void*) info;
-	return FSEventStreamCreate(NULL, (FSEventStreamCallback) fsevtCallback, context, paths, since, latency, flags);
+	return FSEventStreamCreate(NULL, (FSEventStreamCallback) fsevtCallbackMutagen, context, paths, since, latency, flags);
 }
 */
 import "C"
@@ -52,8 +52,8 @@ func LatestEventID() uint64 {
 // arguments are released by C at the end of the callback. Ensure copies
 // are made if data is expected to persist beyond this function ending.
 //
-//export fsevtCallback
-func fsevtCallback(stream C.FSEventStreamRef, info uintptr, numEvents C.size_t, cpaths **C.char, cflags *C.FSEventStreamEventFlags, cids *C.FSEventStreamEventId) {
+//export fsevtCallbackMutagen
+func fsevtCallbackMutagen(stream C.FSEventStreamRef, info uintptr, numEvents C.size_t, cpaths **C.char, cflags *C.FSEventStreamEventFlags, cids *C.FSEventStreamEventId) {
 	l := int(numEvents)
 	events := make([]Event, l)
 
