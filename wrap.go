@@ -1,3 +1,4 @@
+//go:build darwin && go1.10
 // +build darwin,go1.10
 
 package fsevents
@@ -230,7 +231,10 @@ func (es *EventStream) start(paths []string, callbackInfo uintptr) {
 		runtime.LockOSThread()
 		es.rlref = CFRunLoopRef(C.CFRunLoopGetCurrent())
 		C.CFRetain(C.CFTypeRef(es.rlref))
-		C.FSEventStreamScheduleWithRunLoop(es.stream, C.CFRunLoopRef(es.rlref), C.kCFRunLoopDefaultMode)
+		qn := C.CString("FSMonitor")
+		defer C.free(unsafe.Pointer(qn))
+		q := C.dispatch_queue_create((*C.char)(unsafe.Pointer(qn)), nil)
+		C.FSEventStreamSetDispatchQueue(es.stream, q)
 		C.FSEventStreamStart(es.stream)
 		close(started)
 		C.CFRunLoopRun()
